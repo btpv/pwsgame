@@ -1,16 +1,30 @@
 # Example file showing a basic pygame "game loop"
 import pygame
 pygame.init()
-screen_width, screen_height = 1400, 771
+screen_width, screen_height = 700, 406
 win = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Jour Fun Time")
 width = 128
 height = 128
-vel = 5
-x = screen_width // 2 - width // 2
-y = screen_height - height
-vel = 5
 
+class player(object):
+    def __init__(self, x, y, width, height):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.vel = 5
+        self.isjumping = False
+        self.jumpcount = 10
+        self.left = False
+        self.right = True
+        self.walkcount = 0
+        self.jumpframe = 0
+        self.idle = False
+
+x = screen_width // 2 - width // 2
+y = screen_height - height - 23
+wolf = player(x, y, width, height)
 
 walksheet = pygame.image.load('walk.png')
 jumpsheet = pygame.image.load('jump.png')
@@ -21,84 +35,72 @@ jumpright = [jumpsheet.subsurface(pygame.Rect(i * 128, 128, 128, 128)) for i in 
 
 Idle_left = pygame.image.load('Idleleft.png')
 Idle_right = pygame.image.load('Idleright.png')
-char = Idle_right
-bg = pygame.image.load('bg.jpg')
+bg = pygame.image.load('bg.png')
 
 clock = pygame.time.Clock()
 
-isjumping = False
-jumpcount = 10
-left=False
-right=True
-walkcount=0
-jumpframe = 0
-idle=False
-
 def redrawgamewindow():
-    global walkcount
-    global jumpframe
     win.blit(bg, (0,0))
-    if isjumping:
-        if jumpframe + 1 >= 33:
-            jumpframe = 0
-        if left:
-            win.blit(jumpleft[jumpframe//3], (x, y))
-            jumpframe += 1
-        elif right:
-            win.blit(jumpright[jumpframe//3], (x, y))
-            jumpframe += 1
-    elif idle and left:
-        win.blit(Idle_left, (x, y))
-    elif idle and right:
-        win.blit(Idle_right, (x, y))
+    if wolf.isjumping:
+        if wolf.jumpframe + 1 >= 33:
+            wolf.jumpframe = 0
+        if wolf.left:
+            win.blit(jumpleft[wolf.jumpframe//3], (wolf.x, wolf.y))
+        elif wolf.right:
+            win.blit(jumpright[wolf.jumpframe//3], (wolf.x, wolf.y))
+        wolf.jumpframe += 1
+    elif wolf.idle and wolf.left:
+        win.blit(Idle_left, (wolf.x, wolf.y))
+    elif wolf.idle and wolf.right:
+        win.blit(Idle_right, (wolf.x, wolf.y))
     else:
-        if walkcount + 1 >= 33:
-            walkcount = 0
-        if left:
-            win.blit(walkleft[walkcount//3], (x, y))
-            walkcount += 1
-        elif right:
-            win.blit(walkright[walkcount//3], (x, y))
-            walkcount += 1
+        if wolf.walkcount + 1 >= 33:
+            wolf.walkcount = 0
+        if wolf.left:
+            win.blit(walkleft[wolf.walkcount//3], (wolf.x, wolf.y))
+            wolf.walkcount += 1
+        elif wolf.right:
+            win.blit(walkright[wolf.walkcount//3], (wolf.x, wolf.y))
+            wolf.walkcount += 1
     pygame.display.update()   
 
 run = True
 while run:
-    idle=False
+    wolf.idle = False
     clock.tick(33)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_LEFT] and x > 0:
-        x -= vel
-        left=True
-        right=False
-    elif keys[pygame.K_RIGHT] and x < screen_width - width:
-        x += vel
-        left=False
-        right=True
+    if keys[pygame.K_LEFT] and wolf.x > 0:
+        wolf.x -= wolf.vel
+        wolf.left = True
+        wolf.right = False
+    elif keys[pygame.K_RIGHT] and wolf.x < screen_width - wolf.width:
+        wolf.x += wolf.vel
+        wolf.left = False
+        wolf.right = True
     else:
-        walkcount=0
-    if not (isjumping): 
+        wolf.walkcount = 0
+    if not wolf.isjumping: 
         if keys[pygame.K_SPACE]:
-            isjumping = True
-            walkcount=0
+            wolf.isjumping = True
+            wolf.walkcount = 0
     else:
-        if jumpcount >= -10:
-            if jumpcount < 0:
-                y += (jumpcount ** 2) * 0.5
+        if wolf.jumpcount >= -10:
+            if wolf.jumpcount < 0:
+                wolf.y += (wolf.jumpcount ** 2) * 0.5
             else:
-                y -= (jumpcount ** 2) * 0.5
-            jumpcount -= 1
+                wolf.y -= (wolf.jumpcount ** 2) * 0.5
+            wolf.jumpcount -= 1
         else:
-            isjumping = False
-            jumpcount = 10
-            jumpframe = 0
-    if keys[pygame.K_LEFT] == False and keys[pygame.K_RIGHT] == False and not(isjumping):
-        idle=True
-        walkcount=0
-    print(left, right, isjumping, idle)
+            wolf.isjumping = False
+            wolf.jumpcount = 10
+            wolf.jumpframe = 0
+    if not keys[pygame.K_LEFT] and not keys[pygame.K_RIGHT] and not wolf.isjumping:
+        wolf.idle = True
+        wolf.walkcount = 0
+    print(wolf.left, wolf.right, wolf.isjumping, wolf.idle)
     redrawgamewindow()
-pygame.quit()           
+pygame.quit()
