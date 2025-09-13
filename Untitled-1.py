@@ -15,6 +15,9 @@ vel = 5
 
 isjumping = False
 jumpcount = 10
+left=False
+right=False
+walkcount=0
 
 run = True
 while run:
@@ -29,11 +32,7 @@ while run:
     if keys[pygame.K_RIGHT] and x < screen_width - width:
         x += vel
 
-    if not (isjumping):
-        if keys[pygame.K_UP] and y > 0:
-            y -= vel
-        if keys[pygame.K_DOWN] and y < screen_height - height:
-            y += vel 
+    if not (isjumping): 
         if keys[pygame.K_SPACE]:
             isjumping = True
     else:
