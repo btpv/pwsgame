@@ -1,5 +1,4 @@
 # Example file showing a basic pygame "game loop"
-# some change to show git
 import pygame
 pygame.init()
 screen_width, screen_height = 700, 406
