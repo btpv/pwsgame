@@ -22,48 +22,92 @@ class player(object):
         self.jumpframe = 0
         self.idle = False
 
+    def draw(self, win):
+        if self.isjumping:
+            if self.jumpframe + 1 >= 33:
+                self.jumpframe = 0
+            if self.left:
+                win.blit(jumpleft[self.jumpframe // 3], (self.x, self.y))
+            elif self.right:
+                win.blit(jumpright[self.jumpframe // 3], (self.x, self.y))
+            self.jumpframe += 1
+        elif self.idle and self.left:
+            win.blit(Idle_left, (self.x, self.y))
+        elif self.idle and self.right:
+            win.blit(Idle_right, (self.x, self.y))
+        else:
+            if self.walkcount + 1 >= 33:
+                self.walkcount = 0
+            if self.left:
+                win.blit(walkleft[self.walkcount // 3], (self.x, self.y))
+                self.walkcount += 1
+            elif self.right:
+                win.blit(walkright[self.walkcount // 3], (self.x, self.y))
+                self.walkcount += 1
+walksheet_zombie = pygame.image.load('assets/zombies/wild_zombie/Walk.png')
+
+class enemy(object):
+    walkright = [walksheet_zombie.subsurface(pygame.Rect(i * 96, 0, 96, 96)) for i in range(14)]
+    walkleft = [walksheet_zombie.subsurface(pygame.Rect(i * 96, 96, 96, 96)) for i in range(14)]
+    def __init__(self, x, y, width, height, end):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.vel = 3
+        self.end = end
+        self.walkcount = 0
+        self.path = [self.x, self.end]
+
+    def draw(self, win):
+        self.move()
+        if self.walkcount + 1 >= 42:
+            self.walkcount = 0
+        if self.vel > 0:
+            win.blit(self.walkright[self.walkcount // 3], (self.x, self.y))
+            self.walkcount += 1
+        else:
+            win.blit(self.walkleft[self.walkcount // 3], (self.x, self.y))
+            self.walkcount += 1
+    def move(self):
+        if self.vel > 0:
+            if self.x + self.vel < self.path[1]:
+                self.x += self.vel
+            else:
+                self.vel = self.vel * -1
+                self.walkcount = 0
+        else:
+            if self.x - self.vel > self.path[0]:
+                self.x += self.vel
+            else:
+                self.vel = self.vel * -1
+                self.walkcount = 0
+        pass
+
 x = screen_width // 2 - width // 2
 y = screen_height - height - 23
 wolf = player(x, y, width, height)
 
-walksheet = pygame.image.load('assets/walk.png')
-jumpsheet = pygame.image.load('assets/jump.png')
+walksheet = pygame.image.load('assets/player/walk.png')
+jumpsheet = pygame.image.load('assets/player/jump.png')
 walkright = [walksheet.subsurface(pygame.Rect(i * 128, 0, 128, 128)) for i in range(11)]
 walkleft = [walksheet.subsurface(pygame.Rect(i * 128, 128, 128, 128)) for i in range(11)]
 jumpleft = [jumpsheet.subsurface(pygame.Rect(i * 128, 0, 128, 128)) for i in range(11)]
 jumpright = [jumpsheet.subsurface(pygame.Rect(i * 128, 128, 128, 128)) for i in range(11)]
 
-Idle_left = pygame.image.load('assets/Idleleft.png')
-Idle_right = pygame.image.load('assets/Idleright.png')
+Idle_left = pygame.image.load('assets/player/idleleft.png')
+Idle_right = pygame.image.load('assets/player/Idleright.png')
 bg = pygame.image.load('assets/bg.png')
 
 clock = pygame.time.Clock()
 
 def redrawgamewindow():
     win.blit(bg, (0,0))
-    if wolf.isjumping:
-        if wolf.jumpframe + 1 >= 33:
-            wolf.jumpframe = 0
-        if wolf.left:
-            win.blit(jumpleft[wolf.jumpframe//3], (wolf.x, wolf.y))
-        elif wolf.right:
-            win.blit(jumpright[wolf.jumpframe//3], (wolf.x, wolf.y))
-        wolf.jumpframe += 1
-    elif wolf.idle and wolf.left:
-        win.blit(Idle_left, (wolf.x, wolf.y))
-    elif wolf.idle and wolf.right:
-        win.blit(Idle_right, (wolf.x, wolf.y))
-    else:
-        if wolf.walkcount + 1 >= 33:
-            wolf.walkcount = 0
-        if wolf.left:
-            win.blit(walkleft[wolf.walkcount//3], (wolf.x, wolf.y))
-            wolf.walkcount += 1
-        elif wolf.right:
-            win.blit(walkright[wolf.walkcount//3], (wolf.x, wolf.y))
-            wolf.walkcount += 1
+    wolf.draw(win)
+    wild_zombie.draw(win)
     pygame.display.update()   
 
+wild_zombie = enemy(100, screen_height - 96 - 23, 96, 96, 600)
 run = True
 while run:
     wolf.idle = False
