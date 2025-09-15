@@ -26,16 +26,16 @@ x = screen_width // 2 - width // 2
 y = screen_height - height - 23
 wolf = player(x, y, width, height)
 
-walksheet = pygame.image.load('walk.png')
-jumpsheet = pygame.image.load('jump.png')
+walksheet = pygame.image.load('assets/walk.png')
+jumpsheet = pygame.image.load('assets/jump.png')
 walkright = [walksheet.subsurface(pygame.Rect(i * 128, 0, 128, 128)) for i in range(11)]
 walkleft = [walksheet.subsurface(pygame.Rect(i * 128, 128, 128, 128)) for i in range(11)]
 jumpleft = [jumpsheet.subsurface(pygame.Rect(i * 128, 0, 128, 128)) for i in range(11)]
 jumpright = [jumpsheet.subsurface(pygame.Rect(i * 128, 128, 128, 128)) for i in range(11)]
 
-Idle_left = pygame.image.load('Idleleft.png')
-Idle_right = pygame.image.load('Idleright.png')
-bg = pygame.image.load('bg.png')
+Idle_left = pygame.image.load('assets/Idleleft.png')
+Idle_right = pygame.image.load('assets/Idleright.png')
+bg = pygame.image.load('assets/bg.png')
 
 clock = pygame.time.Clock()
 
