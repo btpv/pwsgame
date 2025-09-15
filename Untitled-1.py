@@ -73,18 +73,18 @@ while run:
         if event.type == pygame.QUIT:
             run = False
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_LEFT] and wolf.x > 0:
+    if keys[pygame.K_LEFT] or keys[pygame.K_a] and wolf.x > 0:
         wolf.x -= wolf.vel
         wolf.left = True
         wolf.right = False
-    elif keys[pygame.K_RIGHT] and wolf.x < screen_width - wolf.width:
+    elif keys[pygame.K_RIGHT] or keys[pygame.K_d] and wolf.x < screen_width - wolf.width:
         wolf.x += wolf.vel
         wolf.left = False
         wolf.right = True
     else:
         wolf.walkcount = 0
     if not wolf.isjumping: 
-        if keys[pygame.K_SPACE]:
+        if keys[pygame.K_SPACE] or keys[pygame.K_w] or keys[pygame.K_UP]:
             wolf.isjumping = True
             wolf.walkcount = 0
     else:
@@ -98,7 +98,7 @@ while run:
             wolf.isjumping = False
             wolf.jumpcount = 10
             wolf.jumpframe = 0
-    if not keys[pygame.K_LEFT] and not keys[pygame.K_RIGHT] and not wolf.isjumping:
+    if not (keys[pygame.K_LEFT] or keys[pygame.K_a]) and not (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and not wolf.isjumping:
         wolf.idle = True
         wolf.walkcount = 0
     print(wolf.left, wolf.right, wolf.isjumping, wolf.idle)
