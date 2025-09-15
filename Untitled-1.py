@@ -21,6 +21,8 @@ class player(object):
         self.walkcount = 0
         self.jumpframe = 0
         self.idle = False
+        self.running = False
+        self.runcount = 0
 
     def draw(self, win):
         if self.isjumping:
@@ -35,6 +37,15 @@ class player(object):
             win.blit(Idle_left, (self.x, self.y))
         elif self.idle and self.right:
             win.blit(Idle_right, (self.x, self.y))
+        elif self.running:
+            if self.runcount + 1 >= 27:
+                self.runcount = 0
+            if self.left:
+                win.blit(runleft[self.runcount // 3], (self.x, self.y))
+                self.runcount += 1
+            elif self.right:
+                win.blit(runright[self.runcount // 3], (self.x, self.y))
+                self.runcount += 1
         else:
             if self.walkcount + 1 >= 33:
                 self.walkcount = 0
@@ -90,10 +101,13 @@ wolf = player(x, y, width, height)
 
 walksheet = pygame.image.load('assets/player/walk.png')
 jumpsheet = pygame.image.load('assets/player/jump.png')
+runsheet = pygame.image.load('assets/player/run.png')
 walkright = [walksheet.subsurface(pygame.Rect(i * 128, 0, 128, 128)) for i in range(11)]
 walkleft = [walksheet.subsurface(pygame.Rect(i * 128, 128, 128, 128)) for i in range(11)]
 jumpleft = [jumpsheet.subsurface(pygame.Rect(i * 128, 0, 128, 128)) for i in range(11)]
 jumpright = [jumpsheet.subsurface(pygame.Rect(i * 128, 128, 128, 128)) for i in range(11)]
+runright = [runsheet.subsurface(pygame.Rect(i * 128, 0, 128, 128)) for i in range(9)]
+runleft = [pygame.transform.flip(frame, True, False) for frame in runright]
 
 Idle_left = pygame.image.load('assets/player/idleleft.png')
 Idle_right = pygame.image.load('assets/player/Idleright.png')
@@ -117,6 +131,12 @@ while run:
         if event.type == pygame.QUIT:
             run = False
     keys = pygame.key.get_pressed()
+    if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]:
+        wolf.running = True
+        wolf.vel = 6
+    else:
+        wolf.running = False
+        wolf.vel = 3
     if keys[pygame.K_LEFT] or keys[pygame.K_a] and wolf.x > 0:
         wolf.x -= wolf.vel
         wolf.left = True
@@ -145,6 +165,7 @@ while run:
     if not (keys[pygame.K_LEFT] or keys[pygame.K_a]) and not (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and not wolf.isjumping:
         wolf.idle = True
         wolf.walkcount = 0
+        wolf.runcount = 0
     print(wolf.left, wolf.right, wolf.isjumping, wolf.idle)
     redrawgamewindow()
 pygame.quit()
