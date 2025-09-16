@@ -112,6 +112,32 @@ runleft = [pygame.transform.flip(frame, True, False) for frame in runright]
 Idle_left = pygame.image.load('assets/player/idleleft.png')
 Idle_right = pygame.image.load('assets/player/Idleright.png')
 bg = pygame.image.load('assets/bg.png')
+bg = pygame.transform.scale(bg, (screen_width, screen_height))
+
+scene = 0
+
+def next_scene():
+    global scene, bg
+    scene += 1
+    if scene == 1:
+        bg = pygame.image.load('assets/bg.jpg')
+        bg = pygame.transform.scale(bg, (screen_width, screen_height))
+    else:
+        scene = 0
+        bg = pygame.image.load('assets/bg.png')
+        bg = pygame.transform.scale(bg, (screen_width, screen_height))
+
+def previous_scene():
+    global scene, bg
+    scene -= 1
+    if scene < 0:
+        scene = 1
+    if scene == 1:
+        bg = pygame.image.load('assets/bg.jpg')
+        bg = pygame.transform.scale(bg, (screen_width, screen_height))
+    else:
+        bg = pygame.image.load('assets/bg.png')
+        bg = pygame.transform.scale(bg, (screen_width, screen_height))
 
 clock = pygame.time.Clock()
 
@@ -137,16 +163,22 @@ while run:
     else:
         wolf.running = False
         wolf.vel = 3
-    if keys[pygame.K_LEFT] or keys[pygame.K_a] and wolf.x > 0:
+    if (keys[pygame.K_LEFT] or keys[pygame.K_a]) and wolf.x > 0:
         wolf.x -= wolf.vel
         wolf.left = True
         wolf.right = False
-    elif keys[pygame.K_RIGHT] or keys[pygame.K_d] and wolf.x < screen_width - wolf.width:
+    elif (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and wolf.x < screen_width - wolf.width:
         wolf.x += wolf.vel
         wolf.left = False
         wolf.right = True
     else:
         wolf.walkcount = 0
+    if wolf.x + wolf.width >= screen_width:
+        next_scene()
+        wolf.x = 0
+    elif wolf.x <= 0:
+        previous_scene()
+        wolf.x = screen_width - wolf.width
     if not wolf.isjumping: 
         if keys[pygame.K_SPACE] or keys[pygame.K_w] or keys[pygame.K_UP]:
             wolf.isjumping = True
@@ -166,6 +198,6 @@ while run:
         wolf.idle = True
         wolf.walkcount = 0
         wolf.runcount = 0
-    print(wolf.left, wolf.right, wolf.isjumping, wolf.idle)
+    print(wolf.left, wolf.right, wolf.isjumping, wolf.idle, wolf.vel)
     redrawgamewindow()
 pygame.quit()
