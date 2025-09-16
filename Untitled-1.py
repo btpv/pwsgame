@@ -195,10 +195,10 @@ while run:
         wolf.walkcount = 0
     if wolf.x + wolf.width/2 >= screen_width:
         next_scene()
-        wolf.x = 0
+        wolf.x = 0 - wolf.width/3
     elif wolf.x <= 0 - wolf.width/2:
         previous_scene()
-        wolf.x = screen_width - wolf.width
+        wolf.x = screen_width - wolf.width/3*2
     if not wolf.isjumping: 
         if keys[pygame.K_SPACE] or keys[pygame.K_w] or keys[pygame.K_UP]:
             wolf.isjumping = True
