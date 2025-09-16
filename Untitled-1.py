@@ -15,35 +15,51 @@ class player(object):
         self.height = height
         self.vel = 5
         self.isjumping = False
+        self.isatacking = False
+        self.attackframe = 0
         self.jumpcount = 10
         self.left = False
         self.right = True
         self.walkcount = 0
         self.jumpframe = 0
         self.idle = False
+        self.hitbox = (self.x + 32, self.y + 53, 72, 74)
 
     def draw(self, win):
-        if self.isjumping:
-            if self.jumpframe + 1 >= 33:
-                self.jumpframe = 0
+        if self.isatacking:
+            if self.attackframe + 1 >= 18:
+                self.attackframe = 0
+                self.isatacking = False
             if self.left:
-                win.blit(jumpleft[self.jumpframe // 3], (self.x, self.y))
+                win.blit(attackleft[self.attackframe // 3], (self.x, self.y))
             elif self.right:
-                win.blit(jumpright[self.jumpframe // 3], (self.x, self.y))
-            self.jumpframe += 1
-        elif self.idle and self.left:
-            win.blit(Idle_left, (self.x, self.y))
-        elif self.idle and self.right:
-            win.blit(Idle_right, (self.x, self.y))
+                win.blit(attackright[self.attackframe // 3], (self.x, self.y))
+            self.attackframe += 1
         else:
-            if self.walkcount + 1 >= 33:
-                self.walkcount = 0
-            if self.left:
-                win.blit(walkleft[self.walkcount // 3], (self.x, self.y))
-                self.walkcount += 1
-            elif self.right:
-                win.blit(walkright[self.walkcount // 3], (self.x, self.y))
-                self.walkcount += 1
+            if self.isjumping:
+                if self.jumpframe + 1 >= 33:
+                    self.jumpframe = 0
+                if self.left:
+                    win.blit(jumpleft[self.jumpframe // 3], (self.x, self.y))
+                elif self.right:
+                    win.blit(jumpright[self.jumpframe // 3], (self.x, self.y))
+                self.jumpframe += 1
+            elif self.idle and self.left:
+                win.blit(Idle_left, (self.x, self.y))
+            elif self.idle and self.right:
+                win.blit(Idle_right, (self.x, self.y))
+            else:
+                if self.walkcount + 1 >= 33:
+                    self.walkcount = 0
+                if self.left:
+                    win.blit(walkleft[self.walkcount // 3], (self.x, self.y))
+                    self.walkcount += 1
+                elif self.right:
+                    win.blit(walkright[self.walkcount // 3], (self.x, self.y))
+                    self.walkcount += 1
+        self.hitbox = (self.x + 19, self.y + 53, 85, 74)
+        pygame.draw.rect(win, (255,0,0), self.hitbox,2)
+        
 walksheet_zombie = pygame.image.load('assets/zombies/wild_zombie/Walk.png')
 
 class enemy(object):
@@ -58,6 +74,7 @@ class enemy(object):
         self.end = end
         self.walkcount = 0
         self.path = [self.x, self.end]
+        self.hitbox = (self.x + 24, self.y + 50, 50, 45)
 
     def draw(self, win):
         self.move()
@@ -69,6 +86,8 @@ class enemy(object):
         else:
             win.blit(self.walkleft[self.walkcount // 3], (self.x, self.y))
             self.walkcount += 1
+        self.hitbox = (self.x + 24, self.y + 50, 50, 45)
+        pygame.draw.rect(win, (255,0,0), self.hitbox,2)
     def move(self):
         if self.vel > 0:
             if self.x + self.vel < self.path[1]:
@@ -84,12 +103,16 @@ class enemy(object):
                 self.walkcount = 0
         pass
 
+
 x = screen_width // 2 - width // 2
 y = screen_height - height - 23
 wolf = player(x, y, width, height)
 
 walksheet = pygame.image.load('assets/player/walk.png')
 jumpsheet = pygame.image.load('assets/player/jump.png')
+attacksheet = pygame.image.load('assets/player/attack_1.png')
+attackright = [attacksheet.subsurface(pygame.Rect(i * 128, 0, 128, 128)) for i in range(6)]
+attackleft = [attacksheet.subsurface(pygame.Rect(i * 128, 128, 128, 128)) for i in range(6)]
 walkright = [walksheet.subsurface(pygame.Rect(i * 128, 0, 128, 128)) for i in range(11)]
 walkleft = [walksheet.subsurface(pygame.Rect(i * 128, 128, 128, 128)) for i in range(11)]
 jumpleft = [jumpsheet.subsurface(pygame.Rect(i * 128, 0, 128, 128)) for i in range(11)]
@@ -142,9 +165,11 @@ while run:
             wolf.isjumping = False
             wolf.jumpcount = 10
             wolf.jumpframe = 0
-    if not (keys[pygame.K_LEFT] or keys[pygame.K_a]) and not (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and not wolf.isjumping:
+    if keys[pygame.K_f] and not wolf.isatacking:
+        wolf.isatacking = True
+    if not (keys[pygame.K_LEFT] or keys[pygame.K_a]) and not (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and not wolf.isjumping and not wolf.isatacking:
         wolf.idle = True
         wolf.walkcount = 0
-    print(wolf.left, wolf.right, wolf.isjumping, wolf.idle)
+    print("left:", wolf.left, "jumping:", wolf.isjumping, "idle:", wolf.idle, "atacking:", wolf.isatacking)
     redrawgamewindow()
 pygame.quit()
