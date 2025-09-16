@@ -37,37 +37,34 @@ class player(object):
             elif self.right:
                 win.blit(attackright[self.attackframe // 3], (self.x, self.y))
             self.attackframe += 1
+        elif self.isjumping:
+            if self.jumpframe + 1 >= 33:
+                self.jumpframe = 0
+            if self.left:
+                win.blit(jumpleft[self.jumpframe // 3], (self.x, self.y))
+            elif self.right:
+                win.blit(jumpright[self.jumpframe // 3], (self.x, self.y))
+            self.jumpframe += 1
+        elif self.running:
+            if self.runcount + 1 >= 27:
+                self.runcount = 0
+            if self.left:
+                win.blit(runleft[self.runcount // 3], (self.x, self.y))
+            elif self.right:
+                win.blit(runright[self.runcount // 3], (self.x, self.y))
+            self.runcount += 1
+        elif self.idle and self.left:
+            win.blit(Idle_left, (self.x, self.y))
+        elif self.idle and self.right:
+            win.blit(Idle_right, (self.x, self.y))
         else:
-            if self.isjumping:
-                if self.jumpframe + 1 >= 33:
-                    self.jumpframe = 0
-                if self.left:
-                    win.blit(jumpleft[self.jumpframe // 3], (self.x, self.y))
-                elif self.right:
-                    win.blit(jumpright[self.jumpframe // 3], (self.x, self.y))
-                self.jumpframe += 1
-            elif self.idle and self.left:
-                win.blit(Idle_left, (self.x, self.y))
-            elif self.idle and self.right:
-                win.blit(Idle_right, (self.x, self.y))
-            elif self.running:
-                if self.runcount + 1 >= 27:
-                    self.runcount = 0
-                    if self.left:
-                        win.blit(runleft[self.runcount // 3], (self.x, self.y))
-                        self.runcount += 1
-                    elif self.right:
-                        win.blit(runright[self.runcount // 3], (self.x, self.y))
-                        self.runcount += 1
-                else:
-                        if self.walkcount + 1 >= 33:
-                            self.walkcount = 0
-                        if self.left:
-                            win.blit(walkleft[self.walkcount // 3], (self.x, self.y))
-                            self.walkcount += 1
-                        elif self.right:
-                            win.blit(walkright[self.walkcount // 3], (self.x, self.y))
-                            self.walkcount += 1
+            if self.walkcount + 1 >= 33:
+                self.walkcount = 0
+            if self.left:
+                win.blit(walkleft[self.walkcount // 3], (self.x, self.y))
+            elif self.right:
+                win.blit(walkright[self.walkcount // 3], (self.x, self.y))
+            self.walkcount += 1
         self.hitbox = (self.x + 19, self.y + 53, 85, 74)
         pygame.draw.rect(win, (255,0,0), self.hitbox,2)
         
@@ -180,7 +177,7 @@ while run:
         if event.type == pygame.QUIT:
             run = False
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]:
+    if (keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]) and ((keys[pygame.K_LEFT] or keys[pygame.K_a]) or (keys[pygame.K_RIGHT] or keys[pygame.K_d])):
         wolf.running = True
         wolf.vel = 6
     else:
