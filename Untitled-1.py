@@ -6,6 +6,8 @@ win = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Jour Fun Time")
 width = 128
 height = 128
+hits = 0
+hit = 0
 
 class player(object):
     def __init__(self, x, y, width, height):
@@ -66,6 +68,7 @@ class player(object):
                 win.blit(walkright[self.walkcount // 3], (self.x, self.y))
             self.walkcount += 1
         self.hitbox = (self.x + 19, self.y + 53, 85, 74)
+        pygame.draw.rect(win, (255,0,0), (self.x + 19, self.y + 53, 85 // 2, 74),2)
         pygame.draw.rect(win, (255,0,0), self.hitbox,2)
         
 walksheet_zombie = pygame.image.load('assets/zombies/wild_zombie/Walk.png')
@@ -96,6 +99,7 @@ class enemy(object):
             self.walkcount += 1
         self.hitbox = (self.x + 24, self.y + 50, 50, 45)
         pygame.draw.rect(win, (255,0,0), self.hitbox,2)
+        pygame.draw.rect(win, (255,0,0), (self.x + 24, self.y + 50, 25, 45),2)
     def move(self):
         if self.vel > 0:
             if self.x + self.vel < self.path[1]:
@@ -220,6 +224,13 @@ while run:
         wolf.idle = True
         wolf.walkcount = 0
         wolf.runcount = 0
-    print("left:", wolf.left, "jumping:", wolf.isjumping, "idle:", wolf.idle, "atacking:", wolf.isatacking)
+    if wolf.hitbox[1] < wild_zombie.hitbox[1] + wild_zombie.hitbox[3] and wolf.hitbox[1] + wolf.hitbox[3] > wild_zombie.hitbox[1]:
+        if wolf.hitbox[0] + wolf.hitbox[2] > wild_zombie.hitbox[0] and wolf.hitbox[0] < wild_zombie.hitbox[0] + wild_zombie.hitbox[2]:
+            if (wild_zombie.walkcount > 36 and  wild_zombie.walkcount < 40) and ((wild_zombie.vel == 3 and (wolf.x + (wolf.width // 2)) > (wild_zombie.x + (wild_zombie.width // 2))) or (wild_zombie.vel == -3 and (wolf.x + (wolf.width // 2)) < (wild_zombie.x + (wild_zombie.width // 2)))):
+                hits +=1
+            if wolf.isatacking and (wolf.attackframe > 12 and wolf.attackframe < 16) and ((wolf.right and (wolf.x + (wolf.width // 2)) < (wild_zombie.x + (wild_zombie.width // 2))) or (wolf.left and (wolf.x + (wolf.width // 2)) > (wild_zombie.x + (wild_zombie.width // 2)))):
+                hit +=1
+    #print("left:", wolf.left, "jumping:", wolf.isjumping, "idle:", wolf.idle, "atacking:", wolf.isatacking)
     redrawgamewindow()
+    print(hits, hit)
 pygame.quit()
