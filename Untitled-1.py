@@ -8,6 +8,7 @@ width = 128
 height = 128
 hits = 0
 hit = 0
+developer_mode = False
 
 class player(object):
     def __init__(self, x, y, width, height):
@@ -25,9 +26,10 @@ class player(object):
         self.walkcount = 0
         self.jumpframe = 0
         self.idle = False
-        self.hitbox = (self.x + 32, self.y + 53, 72, 74)
+        self.hitbox = (self.x + 19, self.y + 53, 85, 74)
         self.running = False
         self.runcount = 0
+        self.health = 10
 
     def draw(self, win):
         if self.isatacking:
@@ -68,8 +70,9 @@ class player(object):
                 win.blit(walkright[self.walkcount // 3], (self.x, self.y))
             self.walkcount += 1
         self.hitbox = (self.x + 19, self.y + 53, 85, 74)
-        pygame.draw.rect(win, (255,0,0), (self.x + 19, self.y + 53, 85 // 2, 74),2)
-        pygame.draw.rect(win, (255,0,0), self.hitbox,2)
+        if developer_mode:
+            pygame.draw.rect(win, (255,0,0), (self.x + 19, self.y + 53, 85 // 2, 74),2)
+            pygame.draw.rect(win, (255,0,0), self.hitbox,2)
         
 walksheet_zombie = pygame.image.load('assets/zombies/wild_zombie/Walk.png')
 
@@ -86,6 +89,7 @@ class enemy(object):
         self.walkcount = 0
         self.path = [self.x, self.end]
         self.hitbox = (self.x + 24, self.y + 50, 50, 45)
+        self.health = 10
 
     def draw(self, win):
         self.move()
@@ -98,8 +102,9 @@ class enemy(object):
             win.blit(self.walkleft[self.walkcount // 3], (self.x, self.y))
             self.walkcount += 1
         self.hitbox = (self.x + 24, self.y + 50, 50, 45)
-        pygame.draw.rect(win, (255,0,0), self.hitbox,2)
-        pygame.draw.rect(win, (255,0,0), (self.x + 24, self.y + 50, 25, 45),2)
+        if developer_mode:
+            pygame.draw.rect(win, (255,0,0), self.hitbox,2)
+            pygame.draw.rect(win, (255,0,0), (self.x + 24, self.y + 50, 25, 45),2)
     def move(self):
         if self.vel > 0:
             if self.x + self.vel < self.path[1]:
@@ -228,9 +233,35 @@ while run:
         if wolf.hitbox[0] + wolf.hitbox[2] > wild_zombie.hitbox[0] and wolf.hitbox[0] < wild_zombie.hitbox[0] + wild_zombie.hitbox[2]:
             if (wild_zombie.walkcount > 36 and  wild_zombie.walkcount < 40) and ((wild_zombie.vel == 3 and (wolf.x + (wolf.width // 2)) > (wild_zombie.x + (wild_zombie.width // 2))) or (wild_zombie.vel == -3 and (wolf.x + (wolf.width // 2)) < (wild_zombie.x + (wild_zombie.width // 2)))):
                 hits +=1
+                wolf.health -= 1
             if wolf.isatacking and (wolf.attackframe > 12 and wolf.attackframe < 16) and ((wolf.right and (wolf.x + (wolf.width // 2)) < (wild_zombie.x + (wild_zombie.width // 2))) or (wolf.left and (wolf.x + (wolf.width // 2)) > (wild_zombie.x + (wild_zombie.width // 2)))):
                 hit +=1
+                wild_zombie.health -= 1
+    if wolf.health <= 0:
+        print("You Died")
+        run = False
     #print("left:", wolf.left, "jumping:", wolf.isjumping, "idle:", wolf.idle, "atacking:", wolf.isatacking)
     redrawgamewindow()
-    print(hits, hit)
+    print(wolf.health, wild_zombie.health)
+if run == False:
+    diedsheet = pygame.image.load('assets/player/dead.png')
+    diedright = [diedsheet.subsurface(pygame.Rect(i * 128, 0, 128, 128)) for i in range(2)]
+    diedleft = [diedsheet.subsurface(pygame.Rect(i * 128, 128, 128, 128)) for i in range(2)]
+    win.blit(bg, (0,0))
+    wild_zombie.draw(win)
+    if wolf.left:
+        win.blit(diedleft[0], (wolf.x, wolf.y))
+    else:
+        win.blit(diedright[0], (wolf.x, wolf.y))
+    pygame.display.update()
+    pygame.time.delay(500)
+    win.blit(bg, (0,0))
+    wild_zombie.draw(win)
+    if wolf.left:
+        win.blit(diedleft[1], (wolf.x, wolf.y))
+    else:
+        win.blit(diedright[1], (wolf.x, wolf.y))
+    pygame.display.update()
+    pygame.time.delay(2000)
+    
 pygame.quit()
