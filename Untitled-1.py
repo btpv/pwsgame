@@ -8,7 +8,7 @@ width = 128
 height = 128
 hits = 0
 hit = 0
-developer_mode = False
+developer_mode = True
 
 class player(object):
     def __init__(self, x, y, width, height):
@@ -29,7 +29,7 @@ class player(object):
         self.hitbox = (self.x + 19, self.y + 53, 85, 74)
         self.running = False
         self.runcount = 0
-        self.health = 10
+        self.health = 99
 
     def draw(self, win):
         if self.isatacking:
@@ -73,6 +73,9 @@ class player(object):
         if developer_mode:
             pygame.draw.rect(win, (255,0,0), (self.x + 19, self.y + 53, 85 // 2, 74),2)
             pygame.draw.rect(win, (255,0,0), self.hitbox,2)
+            # White box around wolf
+            white_box = pygame.Rect(self.x, self.y, self.width, self.height)
+            pygame.draw.rect(win, (255,255,255), white_box, 2)
         
 walksheet_zombie = pygame.image.load('assets/zombies/wild_zombie/Walk.png')
 
@@ -85,11 +88,12 @@ class enemy(object):
         self.width = width
         self.height = height
         self.vel = 3
-        self.end = end
         self.walkcount = 0
-        self.path = [self.x, self.end]
         self.hitbox = (self.x + 24, self.y + 50, 50, 45)
         self.health = 10
+        self.left = False
+        self.right = True
+        self.idle = False
 
     def draw(self, win):
         self.move()
@@ -97,28 +101,34 @@ class enemy(object):
             self.walkcount = 0
         if self.vel > 0:
             win.blit(self.walkright[self.walkcount // 3], (self.x, self.y))
-            self.walkcount += 1
-        else:
+            self.right = True
+            self.left = False
+            self.idle = False
+        elif self.vel < 0:
             win.blit(self.walkleft[self.walkcount // 3], (self.x, self.y))
-            self.walkcount += 1
+            self.left = True
+            self.right = False
+            self.idle = False
+        else:
+            self.idle = True
+            if self.right:
+                win.blit(self.walkright[self.walkcount // 3], (self.x, self.y))
+            elif self.left:
+                win.blit(self.walkleft[self.walkcount // 3], (self.x, self.y))
+        self.walkcount += 1
         self.hitbox = (self.x + 24, self.y + 50, 50, 45)
         if developer_mode:
             pygame.draw.rect(win, (255,0,0), self.hitbox,2)
             pygame.draw.rect(win, (255,0,0), (self.x + 24, self.y + 50, 25, 45),2)
+            white_box = pygame.Rect(self.x, self.y, self.width, self.height)
+            pygame.draw.rect(win, (255,255,255), white_box, 2)
     def move(self):
-        if self.vel > 0:
-            if self.x + self.vel < self.path[1]:
+        if abs (self.hitbox[0] - (wolf.x + (wolf.width // 2))) > 3:
+            if self.hitbox[0] < ((wolf.x + (wolf.width // 2)-2)):
+                self.vel = 3
                 self.x += self.vel
-            else:
-                self.vel = self.vel * -1
-                self.walkcount = 0
         else:
-            if self.x - self.vel > self.path[0]:
-                self.x += self.vel
-            else:
-                self.vel = self.vel * -1
-                self.walkcount = 0
-        pass
+            self.vel = 0
 
 
 x = screen_width // 2 - width // 2
@@ -231,7 +241,7 @@ while run:
         wolf.runcount = 0
     if wolf.hitbox[1] < wild_zombie.hitbox[1] + wild_zombie.hitbox[3] and wolf.hitbox[1] + wolf.hitbox[3] > wild_zombie.hitbox[1]:
         if wolf.hitbox[0] + wolf.hitbox[2] > wild_zombie.hitbox[0] and wolf.hitbox[0] < wild_zombie.hitbox[0] + wild_zombie.hitbox[2]:
-            if (wild_zombie.walkcount > 36 and  wild_zombie.walkcount < 40) and ((wild_zombie.vel == 3 and (wolf.x + (wolf.width // 2)) > (wild_zombie.x + (wild_zombie.width // 2))) or (wild_zombie.vel == -3 and (wolf.x + (wolf.width // 2)) < (wild_zombie.x + (wild_zombie.width // 2)))):
+            if (wild_zombie.walkcount > 36 and  wild_zombie.walkcount < 40) and ((wild_zombie.right and (wolf.x + (wolf.width // 2)) > (wild_zombie.x + (wild_zombie.width // 2))) or (wild_zombie.left and (wolf.x + (wolf.width // 2)) < (wild_zombie.x + (wild_zombie.width // 2)))):
                 hits +=1
                 wolf.health -= 1
             if wolf.isatacking and (wolf.attackframe > 12 and wolf.attackframe < 16) and ((wolf.right and (wolf.x + (wolf.width // 2)) < (wild_zombie.x + (wild_zombie.width // 2))) or (wolf.left and (wolf.x + (wolf.width // 2)) > (wild_zombie.x + (wild_zombie.width // 2)))):
@@ -242,7 +252,9 @@ while run:
         run = False
     #print("left:", wolf.left, "jumping:", wolf.isjumping, "idle:", wolf.idle, "atacking:", wolf.isatacking)
     redrawgamewindow()
-    print(wolf.health, wild_zombie.health)
+    print("wolf hitbox:", wolf.hitbox, "zombie hitbox:", wild_zombie.hitbox)
+    print()
+    #print(wild_zombie.x, wolf.x, wild_zombie.vel, wolf.health, hits, hit)
 if run == False:
     diedsheet = pygame.image.load('assets/player/dead.png')
     diedright = [diedsheet.subsurface(pygame.Rect(i * 128, 0, 128, 128)) for i in range(2)]
