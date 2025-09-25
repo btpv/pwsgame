@@ -149,7 +149,7 @@ runright = [runsheet.subsurface(pygame.Rect(i * 128, 0, 128, 128)) for i in rang
 runleft = [pygame.transform.flip(frame, True, False) for frame in runright]
 
 Idle_left = pygame.image.load('assets/player/idleleft.png')
-Idle_right = pygame.image.load('assets/player/Idleright.png')
+Idle_right = pygame.image.load('assets/player/idleright.png')
 bg = pygame.image.load('assets/bg.png')
 bg = pygame.transform.scale(bg, (screen_width, screen_height))
 
